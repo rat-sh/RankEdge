@@ -1,0 +1,54 @@
+src/lib/mmkv/index.ts(3,35): error TS2693: 'MMKV' only refers to a type, but is being used as a value here.
+src/lib/mmkv/index.ts(4,40): error TS2693: 'MMKV' only refers to a type, but is being used as a value here.
+src/lib/mmkv/index.ts(5,33): error TS2693: 'MMKV' only refers to a type, but is being used as a value here.
+src/lib/mmkv/index.ts(6,36): error TS2693: 'MMKV' only refers to a type, but is being used as a value here.
+src/repositories/supabase/SupabaseBatchRepository.ts(21,74): error TS2345: Argument of type 'any' is not assignable to parameter of type 'never'.
+src/repositories/supabase/SupabaseBatchRepository.ts(26,61): error TS2345: Argument of type '{ status: string; }' is not assignable to parameter of type 'never'.
+src/repositories/supabase/SupabaseBatchRepository.ts(30,60): error TS2345: Argument of type '{ p_batch_id: string; p_student_id: string; }' is not assignable to parameter of type 'undefined'.
+src/repositories/supabase/SupabaseBatchRepository.ts(34,60): error TS2345: Argument of type '{ p_batch_id: string; p_student_id: string; }' is not assignable to parameter of type 'undefined'.
+src/screens/auth/ForgotPinNewScreen.tsx(39,51): error TS2345: Argument of type '{ pin_hash: string; }' is not assignable to parameter of type 'never'.
+src/screens/auth/LoginScreen.tsx(38,29): error TS2339: Property 'id' does not exist on type 'never'.
+src/screens/auth/LoginScreen.tsx(38,47): error TS2339: Property 'name' does not exist on type 'never'.
+src/screens/auth/LoginScreen.tsx(38,68): error TS2339: Property 'email' does not exist on type 'never'.
+src/screens/auth/LoginScreen.tsx(38,89): error TS2339: Property 'role' does not exist on type 'never'.
+src/screens/auth/LoginScreen.tsx(38,114): error TS2339: Property 'avatar_url' does not exist on type 'never'.
+src/screens/auth/LoginScreen.tsx(38,144): error TS2339: Property 'batch_ids' does not exist on type 'never'.
+src/screens/auth/LoginScreen.tsx(39,34): error TS2339: Property 'role' does not exist on type 'never'.
+src/screens/auth/SignUpStudentScreen.tsx(34,36): error TS2769: No overload matches this call.
+  Overload 1 of 2, '(values: never, options?: { count?: "exact" | "planned" | "estimated" | undefined; } | undefined): PostgrestFilterBuilder<{ PostgrestVersion: "12"; }, never, never, null, "users", never, "POST">', gave the following error.
+    Argument of type '{ id: string; name: string; email: string; phone: string | null; role: string; pin_hash: string; subject_list: string[]; city: string | null; }' is not assignable to parameter of type 'never'.
+  Overload 2 of 2, '(values: never[], options?: { count?: "exact" | "planned" | "estimated" | undefined; defaultToNull?: boolean | undefined; } | undefined): PostgrestFilterBuilder<{ PostgrestVersion: "12"; }, never, never, null, "users", never, "POST">', gave the following error.
+    Object literal may only specify known properties, and 'id' does not exist in type 'never[]'.
+src/screens/auth/SignUpTeacherScreen.tsx(36,36): error TS2769: No overload matches this call.
+  Overload 1 of 2, '(values: never, options?: { count?: "exact" | "planned" | "estimated" | undefined; } | undefined): PostgrestFilterBuilder<{ PostgrestVersion: "12"; }, never, never, null, "users", never, "POST">', gave the following error.
+    Argument of type '{ id: string; name: string; email: string; phone: string | null; role: string; pin_hash: string; subject_list: string[]; institution: string | null; city: string | null; }' is not assignable to parameter of type 'never'.
+  Overload 2 of 2, '(values: never[], options?: { count?: "exact" | "planned" | "estimated" | undefined; defaultToNull?: boolean | undefined; } | undefined): PostgrestFilterBuilder<{ PostgrestVersion: "12"; }, never, never, null, "users", never, "POST">', gave the following error.
+    Object literal may only specify known properties, and 'id' does not exist in type 'never[]'.
+src/screens/student/ExamResultScreen.tsx(33,27): error TS2339: Property 'correct_count' does not exist on type 'never'.
+src/screens/student/ExamResultScreen.tsx(33,56): error TS2339: Property 'questions' does not exist on type 'never'.
+src/screens/student/ExamResultScreen.tsx(34,51): error TS2339: Property 'score' does not exist on type 'never'.
+src/screens/student/ExamResultScreen.tsx(34,71): error TS2339: Property 'duration_minutes' does not exist on type 'never'.
+src/screens/student/ExamResultScreen.tsx(42,44): error TS2339: Property 'title' does not exist on type 'never'.
+src/screens/student/ExamResultScreen.tsx(44,50): error TS2339: Property 'score' does not exist on type 'never'.
+src/screens/student/ExamResultScreen.tsx(51,49): error TS2339: Property 'correct_count' does not exist on type 'never'.
+src/screens/student/ExamResultScreen.tsx(55,73): error TS2339: Property 'incorrect_count' does not exist on type 'never'.
+src/screens/student/ExamResultScreen.tsx(59,73): error TS2339: Property 'unattempted_count' does not exist on type 'never'.
+src/screens/student/ExamResultScreen.tsx(63,74): error TS2339: Property 'rank' does not exist on type 'never'.
+src/screens/student/ExamResultScreen.tsx(68,19): error TS2339: Property 'time_taken_seconds' does not exist on type 'never'.
+src/screens/student/ExamResultScreen.tsx(72,35): error TS2339: Property 'time_taken_seconds' does not exist on type 'never'.
+src/screens/student/ExamResultScreen.tsx(72,71): error TS2339: Property 'time_taken_seconds' does not exist on type 'never'.
+src/screens/student/ExamResultScreen.tsx(77,17): error TS2339: Property 'is_results_released' does not exist on type 'never'.
+src/screens/student/StudentExamsScreen.tsx(30,21): error TS2339: Property 'batch_ids' does not exist on type 'never'.
+src/screens/student/StudentExamsScreen.tsx(35,40): error TS2339: Property 'batch_ids' does not exist on type 'never'.
+src/screens/student/TakeExamScreen.tsx(44,9): error TS18047: 'examData' is possibly 'null'.
+src/screens/student/TakeExamScreen.tsx(47,20): error TS18047: 'examData' is possibly 'null'.
+src/screens/student/TakeExamScreen.tsx(49,19): error TS18047: 'examData' is possibly 'null'.
+src/screens/student/TakeExamScreen.tsx(50,18): error TS18047: 'examData' is possibly 'null'.
+src/services/exam/index.ts(5,68): error TS2345: Argument of type '{ p_exam_id: string; p_duration_minutes: number; }' is not assignable to parameter of type 'undefined'.
+src/services/exam/index.ts(15,60): error TS2345: Argument of type '{ p_exam_id: string; }' is not assignable to parameter of type 'undefined'.
+src/services/exam/index.ts(23,71): error TS2345: Argument of type '{ p_exam_id: string; p_token: string; }' is not assignable to parameter of type 'undefined'.
+src/services/exam/index.ts(63,6): error TS2769: No overload matches this call.
+  Overload 1 of 2, '(values: never, options?: { onConflict?: string | undefined; ignoreDuplicates?: boolean | undefined; count?: "exact" | "planned" | "estimated" | undefined; } | undefined): PostgrestFilterBuilder<{ ...; }, ... 5 more ..., "POST">', gave the following error.
+    Argument of type '{ exam_id: string; student_id: string; answers: Record<string, any>; marked_for_review: string[]; time_taken_seconds: number; submitted_at: string; }' is not assignable to parameter of type 'never'.
+  Overload 2 of 2, '(values: never[], options?: { onConflict?: string | undefined; ignoreDuplicates?: boolean | undefined; count?: "exact" | "planned" | "estimated" | undefined; defaultToNull?: boolean | undefined; } | undefined): PostgrestFilterBuilder<...>', gave the following error.
+    Object literal may only specify known properties, and 'exam_id' does not exist in type 'never[]'.
