@@ -20,7 +20,7 @@ const JoinBatchScreen = () => {
     if (code.trim().length < 6) { Alert.alert('Error', 'Enter a valid join code'); return; }
     setLoading(true);
     try {
-      const { data, error } = await supabase.from('batches').select('id, name, subject, exam_category, student_ids, teacher_id').eq('join_code', code.trim().toUpperCase()).eq('status', 'ACTIVE').single();
+      const { data, error } = await (supabase.from('batches').select('id, name, subject, exam_category, student_ids, teacher_id').eq('join_code', code.trim().toUpperCase()).eq('status', 'ACTIVE').single() as any) as { data: any; error: any };
       if (error || !data) { Alert.alert('Not Found', 'No active batch with this code'); setPreview(null); return; }
       setPreview(data);
     } catch { Alert.alert('Error', 'Could not find batch'); }
@@ -31,7 +31,7 @@ const JoinBatchScreen = () => {
     if (!preview) return;
     setLoading(true);
     try {
-      await supabase.rpc('enroll_student', { p_batch_id: preview.id, p_student_id: user!.id });
+      await (supabase as any).rpc('add_student_to_batch', { p_batch_id: preview.id, p_student_id: user!.id });
       qc.invalidateQueries({ queryKey: ['my_teachers'] });
       qc.invalidateQueries({ queryKey: ['student_home'] });
       Alert.alert('Joined!', `You've joined ${preview.name}`, [{ text: 'OK', onPress: () => navigation.goBack() }]);

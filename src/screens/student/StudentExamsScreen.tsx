@@ -21,11 +21,11 @@ const StudentExamsScreen = () => {
   const { data: exams = [], isLoading, refetch } = useQuery({
     queryKey: ['student_exams', user?.id],
     queryFn: async () => {
-      const { data: profile } = await supabase
+      const { data: profile } = await (supabase
         .from('users')
         .select('batch_ids')
         .eq('id', user!.id)
-        .single();
+        .single() as any) as { data: { batch_ids: string[] } | null };
 
       if (!profile?.batch_ids?.length) return [];
 

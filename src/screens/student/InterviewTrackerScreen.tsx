@@ -9,9 +9,9 @@ const InterviewTrackerScreen = () => {
   const { data, isLoading } = useQuery({
     queryKey: ['interview_tracker', user?.id],
     queryFn: async () => {
-      const { data } = await supabase.from('interview_attempts').select('id, score, total_marks, completed_at, pack_id').eq('student_id', user!.id).order('completed_at', { ascending: false });
+      const { data } = await (supabase.from('interview_attempts').select('id, score, total_marks, completed_at, pack_id').eq('student_id', user!.id).order('completed_at', { ascending: false }) as any) as { data: Array<{ id: string; score: number; total_marks: number; completed_at: string; pack_id: string }> | null };
       const attempts = data ?? [];
-      const avg = attempts.length ? Math.round(attempts.reduce((s: number, a: any) => s + (a.score / a.total_marks * 100), 0) / attempts.length) : 0;
+      const avg = attempts.length ? Math.round(attempts.reduce((s, a) => s + (a.score / a.total_marks * 100), 0) / attempts.length) : 0;
       return { attempts, avg, total: attempts.length };
     },
     enabled: !!user,

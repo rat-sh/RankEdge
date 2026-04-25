@@ -16,11 +16,11 @@ const MyTeachersScreen = () => {
   const { data: batches = [], isLoading, refetch } = useQuery({
     queryKey: ['my_teachers', user?.id],
     queryFn: async () => {
-      const { data: profile } = await supabase.from('users').select('batch_ids').eq('id', user!.id).single();
-      const batchIds: string[] = (profile as any)?.batch_ids ?? [];
+      const { data: profile } = await (supabase.from('users').select('batch_ids').eq('id', user!.id).single() as any) as { data: { batch_ids: string[] } | null };
+      const batchIds: string[] = profile?.batch_ids ?? [];
       if (!batchIds.length) return [];
-      const { data } = await supabase.from('batches').select('id, name, subject, exam_category, teacher_id, join_code, student_ids, status').in('id', batchIds);
-      return data ?? [];
+      const { data } = await (supabase.from('batches').select('id, name, subject, exam_category, teacher_id, join_code, student_ids, status').in('id', batchIds) as any) as { data: any[] | null };
+      return (data ?? []) as Array<{ id: string; name: string; subject: string; exam_category: string; teacher_id: string; join_code: string; student_ids: string[]; status: string }>;
     },
     enabled: !!user,
   });

@@ -20,9 +20,9 @@ const BatchDetailScreen = () => {
   const { data: batch, isLoading } = useQuery({
     queryKey: ['batch_detail', batchId],
     queryFn: async () => {
-      const { data, error } = await supabase.from('batches').select('*').eq('id', batchId).single();
+      const { data, error } = await (supabase.from('batches').select('*').eq('id', batchId).single() as any) as { data: any; error: any };
       if (error) throw error;
-      return data;
+      return data as { id: string; name: string; subject: string; exam_category: string; join_code: string; student_ids: string[]; schedule: string | null; max_students: number; fee_amount: number | null; status: string; teacher_id: string; created_at: string };
     },
   });
 
@@ -30,7 +30,7 @@ const BatchDetailScreen = () => {
     queryKey: ['batch_students', batchId],
     queryFn: async () => {
       if (!batch?.student_ids?.length) return [];
-      const { data } = await supabase.from('users').select('id, name, email, avatar_url').in('id', batch.student_ids);
+      const { data } = await (supabase.from('users').select('id, name, email, avatar_url').in('id', batch.student_ids) as any) as { data: Array<{ id: string; name: string; email: string; avatar_url: string | null }> | null };
       return data ?? [];
     },
     enabled: !!batch,
@@ -39,7 +39,7 @@ const BatchDetailScreen = () => {
   const { data: exams = [] } = useQuery({
     queryKey: ['batch_exams', batchId],
     queryFn: async () => {
-      const { data } = await supabase.from('exams').select('id, title, scheduled_at, is_live, duration_minutes').overlaps('batch_ids', [batchId]).order('created_at', { ascending: false });
+      const { data } = await (supabase.from('exams').select('id, title, scheduled_at, is_live, duration_minutes').overlaps('batch_ids', [batchId]).order('created_at', { ascending: false }) as any) as { data: Array<{ id: string; title: string; scheduled_at: string | null; is_live: boolean; duration_minutes: number }> | null };
       return data ?? [];
     },
   });
@@ -47,7 +47,7 @@ const BatchDetailScreen = () => {
   const { data: assignments = [] } = useQuery({
     queryKey: ['batch_assignments', batchId],
     queryFn: async () => {
-      const { data } = await supabase.from('assignments').select('id, title, deadline, max_marks').eq('batch_id', batchId).order('deadline', { ascending: false });
+      const { data } = await (supabase.from('assignments').select('id, title, deadline, max_marks').eq('batch_id', batchId).order('deadline', { ascending: false }) as any) as { data: Array<{ id: string; title: string; deadline: string; max_marks: number }> | null };
       return data ?? [];
     },
   });
@@ -58,7 +58,7 @@ const BatchDetailScreen = () => {
       {
         text: 'Remove', style: 'destructive',
         onPress: async () => {
-          await supabase.rpc('remove_student', { p_batch_id: batchId, p_student_id: studentId });
+          await (supabase as any).rpc('remove_student_from_batch', { p_batch_id: batchId, p_student_id: studentId });
           qc.invalidateQueries({ queryKey: ['batch_detail', batchId] });
           qc.invalidateQueries({ queryKey: ['batch_students', batchId] });
         },

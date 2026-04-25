@@ -22,7 +22,7 @@ const AddEditBatchScreen = () => {
 
   useEffect(() => {
     if (batchId) {
-      supabase.from('batches').select('*').eq('id', batchId).single().then(({ data }) => {
+      (supabase.from('batches').select('*').eq('id', batchId).single() as any).then(({ data }: { data: any }) => {
         if (data) setForm({ name: data.name, subject: data.subject, exam_category: data.exam_category, schedule: data.schedule ?? '', max_students: String(data.max_students ?? 100), fee_amount: String(data.fee_amount ?? '') });
       });
     }
@@ -36,9 +36,9 @@ const AddEditBatchScreen = () => {
     try {
       const payload = { name: form.name.trim(), subject: form.subject, exam_category: form.exam_category, schedule: form.schedule || null, max_students: parseInt(form.max_students) || 100, fee_amount: form.fee_amount ? parseFloat(form.fee_amount) : null, teacher_id: user!.id };
       if (batchId) {
-        await supabase.from('batches').update(payload).eq('id', batchId);
+        await (supabase.from('batches') as any).update(payload).eq('id', batchId);
       } else {
-        await supabase.from('batches').insert(payload);
+        await (supabase.from('batches') as any).insert(payload);
       }
       qc.invalidateQueries({ queryKey: ['teacher_batches'] });
       qc.invalidateQueries({ queryKey: ['batch_detail', batchId] });

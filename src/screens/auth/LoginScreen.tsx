@@ -33,9 +33,9 @@ const LoginScreen = () => {
     setLoading(true);
     try {
       const data = await loginWithPin(email.trim().toLowerCase(), pin);
-      const { data: profile } = await supabase.from('users').select('*').eq('id', data.user!.id).single();
+      const { data: profile } = await (supabase.from('users').select('*').eq('id', data.user!.id).single() as any) as { data: { id: string; name: string; email: string; role: 'TEACHER' | 'STUDENT'; avatar_url: string | null; batch_ids: string[] } | null };
       if (!profile) throw new Error('Profile not found');
-      setUser({ id: profile.id, name: profile.name, email: profile.email, role: profile.role, avatarUrl: profile.avatar_url, batchIds: profile.batch_ids });
+      setUser({ id: profile.id, name: profile.name, email: profile.email, role: profile.role, avatarUrl: profile.avatar_url ?? undefined, batchIds: profile.batch_ids });
       navigation.replace(profile.role === 'TEACHER' ? ROUTES.TEACHER_ROOT : ROUTES.STUDENT_ROOT);
     } catch (e: any) {
       incrementFailedAttempts();

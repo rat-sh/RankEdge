@@ -16,12 +16,12 @@ const PostDoubtScreen = () => {
 
   React.useEffect(() => {
     (async () => {
-      const { data: profile } = await supabase.from('users').select('batch_ids').eq('id', user!.id).single();
+      const { data: profile } = await (supabase.from('users').select('batch_ids').eq('id', user!.id).single() as any) as { data: any };
       const ids: string[] = (profile as any)?.batch_ids ?? [];
       if (ids.length) {
-        const { data } = await supabase.from('batches').select('id, name, subject').in('id', ids);
+        const { data } = await (supabase.from('batches').select('id, name, subject').in('id', ids) as any) as { data: any[] };
         setBatches(data ?? []);
-        if (data?.length) setBatchId(data[0].id);
+        if (data?.length) setBatchId((data[0] as any).id);
       }
     })();
   }, []);
@@ -33,7 +33,7 @@ const PostDoubtScreen = () => {
     if (!batchId) { Alert.alert('Error', 'Select a batch'); return; }
     setLoading(true);
     try {
-      await supabase.from('doubts').insert({ batch_id: batchId, student_id: user!.id, subject: form.subject, chapter: form.chapter, content: form.content });
+      await (supabase.from('doubts') as any).insert({ batch_id: batchId, student_id: user!.id, subject: form.subject, chapter: form.chapter, content: form.content });
       qc.invalidateQueries({ queryKey: ['student_doubts'] });
       navigation.goBack();
     } catch (e: any) { Alert.alert('Error', e.message); }

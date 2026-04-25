@@ -36,7 +36,7 @@ const ForgotPinNewScreen = () => {
               const { data: { user } } = await supabase.auth.getUser();
               if (!user) throw new Error('Session expired');
               await supabase.auth.updateUser({ password: `${pinHash}_rke_v1` });
-              await supabase.from('users').update({ pin_hash: pinHash }).eq('id', user.id);
+              await (supabase.from('users') as any).update({ pin_hash: pinHash }).eq('id', user.id);
               Alert.alert('Success', 'PIN updated successfully', [{ text: 'Log In', onPress: () => navigation.replace(ROUTES.LOGIN) }]);
             } catch (e: any) {
               Alert.alert('Error', e.message);

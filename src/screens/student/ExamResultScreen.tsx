@@ -16,10 +16,12 @@ const ExamResultScreen = () => {
   const { data, isLoading } = useQuery({
     queryKey: ['exam_result', examId, user?.id],
     queryFn: async () => {
-      const [{ data: attempt }, { data: exam }] = await Promise.all([
-        supabase.from('exam_attempts').select('*').eq('exam_id', examId).eq('student_id', user!.id).single(),
-        supabase.from('exams').select('*').eq('id', examId).single(),
+      const [attemptRes, examRes] = await Promise.all([
+        supabase.from('exam_attempts').select('*').eq('exam_id', examId).eq('student_id', user!.id).single() as any,
+        supabase.from('exams').select('*').eq('id', examId).single() as any,
       ]);
+      const attempt = attemptRes.data as { score: number; correct_count: number; incorrect_count: number; unattempted_count: number; rank: number | null; time_taken_seconds: number | null } | null;
+      const exam = examRes.data as { title: string; duration_minutes: number; is_results_released: boolean } | null;
       return { attempt, exam };
     },
     enabled: !!user,
@@ -30,8 +32,7 @@ const ExamResultScreen = () => {
   );
 
   const { attempt, exam } = data ?? {};
-  const total = (attempt?.correct_count ?? 0) * (exam?.questions?.[0]?.positive_marks ?? 4);
-  const percentage = exam ? Math.round(((attempt?.score ?? 0) / (exam.duration_minutes ?? 1)) * 100) : 0;
+  const percentage = exam ? Math.round(((attempt?.score ?? 0) / Math.max(exam.duration_minutes, 1)) * 100) : 0;
 
   return (
     <View style={s.root}>

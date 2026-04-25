@@ -33,7 +33,7 @@ const SignUpTeacherScreen = () => {
         password: `${pinHash}_rke_v1`,
       });
       if (error) throw error;
-      await supabase.from('users').insert({
+      await (supabase.from('users') as any).insert({
         id: data.user!.id, name: form.name.trim(), email: form.email.trim().toLowerCase(),
         phone: form.phone || null, role: 'TEACHER', pin_hash: pinHash,
         subject_list: selectedSubjects, institution: form.institution || null, city: form.city || null,

@@ -1,26 +1,28 @@
 import { supabase } from '@/lib/supabase/client';
 
+const sb = supabase as any;
+
 // Teacher: start exam and get session token
-export const startExamSession = async (examId: string, durationMinutes: number) => {
-  const { data, error } = await supabase.rpc('start_exam_session', {
+export const startExamSession = async (examId: string, durationMinutes: number): Promise<string> => {
+  const { data, error } = await sb.rpc('start_exam_session', {
     p_exam_id: examId,
     p_duration_minutes: durationMinutes,
   });
   if (error) throw error;
-  return data as string; // returns token like "ABC123-DEF456"
+  return data as string;
 };
 
 // Teacher: end exam session
-export const endExamSession = async (examId: string) => {
-  const { error } = await supabase.rpc('end_exam_session', {
+export const endExamSession = async (examId: string): Promise<void> => {
+  const { error } = await sb.rpc('end_exam_session', {
     p_exam_id: examId,
   });
   if (error) throw error;
 };
 
 // Student: validate token before entering exam
-export const validateExamSession = async (examId: string, token: string) => {
-  const { data, error } = await supabase.rpc('validate_exam_session', {
+export const validateExamSession = async (examId: string, token: string): Promise<boolean> => {
+  const { data, error } = await sb.rpc('validate_exam_session', {
     p_exam_id: examId,
     p_token: token.toUpperCase(),
   });
@@ -41,11 +43,11 @@ export const getLiveExams = async (batchIds: string[]) => {
 
 // Get exam by id
 export const getExamById = async (examId: string) => {
-  const { data, error } = await supabase
+  const { data, error } = await (supabase
     .from('exams')
     .select('*')
     .eq('id', examId)
-    .single();
+    .single() as any) as { data: any; error: any };
   if (error) throw error;
   return data;
 };
@@ -58,8 +60,8 @@ export const submitExamAttempt = async (payload: {
   markedForReview: string[];
   timeTakenSeconds: number;
 }) => {
-  const { data, error } = await supabase
-    .from('exam_attempts')
+  const { data, error } = await (supabase
+    .from('exam_attempts') as any)
     .upsert({
       exam_id: payload.examId,
       student_id: payload.studentId,
@@ -69,7 +71,7 @@ export const submitExamAttempt = async (payload: {
       submitted_at: new Date().toISOString(),
     })
     .select()
-    .single();
+    .single() as { data: any; error: any };
   if (error) throw error;
   return data;
 };
