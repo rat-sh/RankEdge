@@ -10,20 +10,42 @@ import { supabase } from '@/lib/supabase/client';
 import { submitExamAttempt } from '@/services/exam';
 import { ROUTES, TIMER_WARNING_SECONDS } from '@/constants';
 
+type ExamData = {
+  id: string;
+  title: string;
+  duration_minutes: number;
+  shuffle_questions: boolean;
+  question_ids: string[] | null;
+};
+
+type Question = {
+  id: string;
+  type: string;
+  text: string;
+  options: string[] | null;
+  difficulty: string | null;
+  positive_marks: number;
+  negative_marks: number;
+};
+
 const TakeExamScreen = () => {
   const navigation = useNavigation<any>();
   const route = useRoute<any>();
-  const { examId } = route.params;
+  const { examId } = route.params as { examId: string };
   const { user } = useAuthStore();
-  const { answers, markedForReview, setAnswer, toggleReview, setCurrentQuestion, currentQuestionIndex, startAttempt, clearAttempt, startedAt } = useExamStore();
+  const {
+    answers, markedForReview, setAnswer, toggleReview,
+    setCurrentQuestion, currentQuestionIndex,
+    startAttempt, clearAttempt,
+  } = useExamStore();
 
-  const [exam, setExam] = useState<any>(null);
-  const [questions, setQuestions] = useState<any[]>([]);
+  const [exam, setExam] = useState<ExamData | null>(null);
+  const [questions, setQuestions] = useState<Question[]>([]);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [timeLeft, setTimeLeft] = useState(0);
   const [showNavigator, setShowNavigator] = useState(false);
-  const timerRef = useRef<any>(null);
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   useEffect(() => {
     loadExam();
@@ -33,22 +55,43 @@ const TakeExamScreen = () => {
     });
     return () => {
       backHandler.remove();
-      clearInterval(timerRef.current);
+      if (timerRef.current) clearInterval(timerRef.current);
     };
   }, []);
 
   const loadExam = async () => {
     try {
-      const { data: examData } = await supabase.from('exams').select('*').eq('id', examId).single();
-      const { data: qData } = await supabase.from('questions').select('*').in('id',
-        examData.question_ids ?? []
-      );
-      setExam(examData);
-      setQuestions(examData.shuffle_questions ? shuffle(qData ?? []) : (qData ?? []));
+      const { data: examData, error: examError } = await supabase
+        .from('exams')
+        .select('id, title, duration_minutes, shuffle_questions, question_ids')
+        .eq('id', examId)
+        .single();
+
+      if (examError || !examData) throw new Error('Exam not found');
+
+      const typedExam = examData as ExamData;
+      const questionIds: string[] = typedExam.question_ids ?? [];
+
+      let loadedQuestions: Question[] = [];
+      if (questionIds.length > 0) {
+        const { data: qData } = await supabase
+          .from('questions')
+          .select('id, type, text, options, difficulty, positive_marks, negative_marks')
+          .in('id', questionIds);
+        loadedQuestions = (qData ?? []) as Question[];
+        if (typedExam.shuffle_questions) {
+          loadedQuestions = [...loadedQuestions].sort(() => Math.random() - 0.5);
+        }
+      }
+
+      setExam(typedExam);
+      setQuestions(loadedQuestions);
       startAttempt(examId);
-      setTimeLeft(examData.duration_minutes * 60);
-      startTimer(examData.duration_minutes * 60);
-    } catch (e) {
+
+      const secs = typedExam.duration_minutes * 60;
+      setTimeLeft(secs);
+      startTimer(secs);
+    } catch {
       Alert.alert('Error', 'Could not load exam');
       navigation.goBack();
     } finally {
@@ -56,13 +99,11 @@ const TakeExamScreen = () => {
     }
   };
 
-  const shuffle = (arr: any[]) => [...arr].sort(() => Math.random() - 0.5);
-
   const startTimer = (seconds: number) => {
     timerRef.current = setInterval(() => {
       setTimeLeft(prev => {
         if (prev <= 1) {
-          clearInterval(timerRef.current);
+          if (timerRef.current) clearInterval(timerRef.current);
           handleSubmit(true);
           return 0;
         }
@@ -85,10 +126,11 @@ const TakeExamScreen = () => {
   };
 
   const handleSubmit = useCallback(async (autoSubmit = false) => {
+    if (!exam) return;
     if (!autoSubmit) {
       const unattempted = questions.length - Object.keys(answers).length;
       if (unattempted > 0) {
-        const confirmed = await new Promise(resolve =>
+        const confirmed = await new Promise<boolean>(resolve =>
           Alert.alert('Submit Exam?', `${unattempted} question(s) unattempted.`, [
             { text: 'Review', onPress: () => resolve(false) },
             { text: 'Submit', onPress: () => resolve(true) },
@@ -97,8 +139,7 @@ const TakeExamScreen = () => {
         if (!confirmed) return;
       }
     }
-
-    clearInterval(timerRef.current);
+    if (timerRef.current) clearInterval(timerRef.current);
     setSubmitting(true);
     try {
       const timeTaken = exam.duration_minutes * 60 - timeLeft;
@@ -111,19 +152,18 @@ const TakeExamScreen = () => {
       });
       clearAttempt();
       navigation.replace(ROUTES.EXAM_RESULT, { examId });
-    } catch (e: any) {
-      Alert.alert('Error', e.message);
+    } catch (e: unknown) {
+      const msg = e instanceof Error ? e.message : 'Submission failed';
+      Alert.alert('Error', msg);
       setSubmitting(false);
     }
-  }, [answers, markedForReview, timeLeft, exam]);
+  }, [answers, markedForReview, timeLeft, exam, questions]);
 
-  const currentQ = questions[currentQuestionIndex];
+  const currentQ = questions[currentQuestionIndex] ?? null;
   const isWarning = timeLeft <= TIMER_WARNING_SECONDS;
 
   if (loading) return (
-    <View style={s.center}>
-      <ActivityIndicator color="#10B981" size="large" />
-    </View>
+    <View style={s.center}><ActivityIndicator color="#10B981" size="large" /></View>
   );
 
   if (submitting) return (
@@ -137,7 +177,6 @@ const TakeExamScreen = () => {
     <View style={s.root}>
       <StatusBar hidden />
 
-      {/* Header */}
       <View style={s.header}>
         <TouchableOpacity onPress={handleExit} style={s.exitBtn}>
           <Text style={s.exitText}>✕</Text>
@@ -151,73 +190,82 @@ const TakeExamScreen = () => {
         </TouchableOpacity>
       </View>
 
-      {/* Question */}
       <ScrollView style={s.qScroll} contentContainerStyle={s.qContent}>
-        <View style={s.qMeta}>
-          <Text style={s.qNumber}>Q{currentQuestionIndex + 1}</Text>
-          {currentQ?.difficulty && (
-            <Text style={[s.diffBadge,
-              currentQ.difficulty === 'HARD' ? s.hard :
-              currentQ.difficulty === 'EASY' ? s.easy : s.medium
-            ]}>{currentQ.difficulty}</Text>
-          )}
-          {markedForReview.includes(currentQ?.id) && (
-            <Text style={s.reviewBadge}>Marked for Review</Text>
-          )}
-        </View>
+        {currentQ ? (
+          <>
+            <View style={s.qMeta}>
+              <Text style={s.qNumber}>Q{currentQuestionIndex + 1}</Text>
+              {currentQ.difficulty ? (
+                <Text style={[
+                  s.diffBadge,
+                  currentQ.difficulty === 'HARD' ? s.hard :
+                  currentQ.difficulty === 'EASY' ? s.easy : s.medium,
+                ]}>
+                  {currentQ.difficulty}
+                </Text>
+              ) : null}
+              {markedForReview.includes(currentQ.id) && (
+                <Text style={s.reviewBadge}>Marked for Review</Text>
+              )}
+            </View>
+            <Text style={s.qText}>{currentQ.text}</Text>
 
-        <Text style={s.qText}>{currentQ?.text}</Text>
+            {(currentQ.type === 'MCQ_SINGLE' ||
+              currentQ.type === 'MCQ_MULTI' ||
+              currentQ.type === 'TRUE_FALSE') && (
+              <View style={s.options}>
+                {(currentQ.type === 'TRUE_FALSE'
+                  ? ['True', 'False']
+                  : currentQ.options ?? []
+                ).map((opt: string, i: number) => {
+                  const isMulti = currentQ.type === 'MCQ_MULTI';
+                  const selected = isMulti
+                    ? ((answers[currentQ.id] as string[]) ?? []).includes(opt)
+                    : answers[currentQ.id] === opt;
+                  return (
+                    <TouchableOpacity
+                      key={i}
+                      style={[s.option, selected && s.optionSelected]}
+                      onPress={() => {
+                        if (isMulti) {
+                          const prev = (answers[currentQ.id] as string[]) ?? [];
+                          setAnswer(currentQ.id, selected ? prev.filter(x => x !== opt) : [...prev, opt]);
+                        } else {
+                          setAnswer(currentQ.id, opt);
+                        }
+                      }}
+                    >
+                      <View style={[s.optionDot, selected && s.optionDotSelected]}>
+                        {selected && <View style={s.optionDotInner} />}
+                      </View>
+                      <Text style={[s.optionText, selected && s.optionTextSelected]}>{opt}</Text>
+                    </TouchableOpacity>
+                  );
+                })}
+              </View>
+            )}
 
-        {/* MCQ Options */}
-        {(currentQ?.type === 'MCQ_SINGLE' || currentQ?.type === 'MCQ_MULTI' || currentQ?.type === 'TRUE_FALSE') && (
-          <View style={s.options}>
-            {(currentQ?.type === 'TRUE_FALSE' ? ['True', 'False'] : currentQ?.options ?? []).map((opt: string, i: number) => {
-              const selected = currentQ?.type === 'MCQ_MULTI'
-                ? (answers[currentQ.id] as string[] ?? []).includes(opt)
-                : answers[currentQ.id] === opt;
-              return (
-                <TouchableOpacity
-                  key={i}
-                  style={[s.option, selected && s.optionSelected]}
-                  onPress={() => {
-                    if (currentQ?.type === 'MCQ_MULTI') {
-                      const prev = (answers[currentQ.id] as string[] ?? []);
-                      setAnswer(currentQ.id, selected ? prev.filter(x => x !== opt) : [...prev, opt]);
-                    } else {
-                      setAnswer(currentQ.id, opt);
-                    }
-                  }}
-                >
-                  <View style={[s.optionDot, selected && s.optionDotSelected]}>
-                    {selected && <View style={s.optionDotInner} />}
-                  </View>
-                  <Text style={[s.optionText, selected && s.optionTextSelected]}>{opt}</Text>
-                </TouchableOpacity>
-              );
-            })}
-          </View>
+            <View style={s.marksRow}>
+              <Text style={s.marksText}>+{currentQ.positive_marks} marks</Text>
+              {currentQ.negative_marks > 0 && (
+                <Text style={s.negMarksText}>-{currentQ.negative_marks} negative</Text>
+              )}
+            </View>
+          </>
+        ) : (
+          <Text style={s.noQ}>No questions loaded</Text>
         )}
-
-        {/* Marks info */}
-        <View style={s.marksRow}>
-          <Text style={s.marksText}>+{currentQ?.positive_marks} marks</Text>
-          {currentQ?.negative_marks > 0 && (
-            <Text style={s.negMarksText}>-{currentQ?.negative_marks} negative</Text>
-          )}
-        </View>
       </ScrollView>
 
-      {/* Footer */}
       <View style={s.footer}>
         <TouchableOpacity
           style={s.reviewBtn}
           onPress={() => currentQ && toggleReview(currentQ.id)}
         >
           <Text style={s.reviewBtnText}>
-            {markedForReview.includes(currentQ?.id) ? 'Unmark' : 'Mark Review'}
+            {currentQ && markedForReview.includes(currentQ.id) ? 'Unmark' : 'Mark Review'}
           </Text>
         </TouchableOpacity>
-
         <View style={s.navBtns}>
           <TouchableOpacity
             style={[s.navBtn, currentQuestionIndex === 0 && s.navBtnDisabled]}
@@ -226,7 +274,6 @@ const TakeExamScreen = () => {
           >
             <Text style={s.navBtnText}>← Prev</Text>
           </TouchableOpacity>
-
           {currentQuestionIndex === questions.length - 1 ? (
             <TouchableOpacity style={s.submitBtn} onPress={() => handleSubmit(false)}>
               <Text style={s.submitBtnText}>Submit</Text>
@@ -242,7 +289,6 @@ const TakeExamScreen = () => {
         </View>
       </View>
 
-      {/* Question Navigator Modal */}
       <Modal visible={showNavigator} transparent animationType="slide">
         <View style={s.navOverlay}>
           <View style={s.navModal}>
@@ -275,7 +321,7 @@ const TakeExamScreen = () => {
             <View style={s.navLegend}>
               <View style={s.legendItem}><View style={[s.legendDot, { backgroundColor: '#10B981' }]} /><Text style={s.legendText}>Answered</Text></View>
               <View style={s.legendItem}><View style={[s.legendDot, { backgroundColor: '#F59E0B' }]} /><Text style={s.legendText}>Review</Text></View>
-              <View style={s.legendItem}><View style={[s.legendDot, { backgroundColor: '#374151' }]} /><Text style={s.legendText}>Unattempted</Text></View>
+              <View style={s.legendItem}><View style={[s.legendDot, { backgroundColor: '#374151' }]} /><Text style={s.legendText}>Skipped</Text></View>
             </View>
             <TouchableOpacity style={s.closeNavBtn} onPress={() => setShowNavigator(false)}>
               <Text style={s.closeNavBtnText}>Close</Text>
@@ -291,6 +337,7 @@ const s = StyleSheet.create({
   root: { flex: 1, backgroundColor: '#111827' },
   center: { flex: 1, backgroundColor: '#111827', alignItems: 'center', justifyContent: 'center' },
   submittingText: { color: '#F9FAFB', fontSize: 16, marginTop: 16 },
+  noQ: { color: '#6B7280', textAlign: 'center', marginTop: 40 },
   header: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, paddingTop: 16, paddingBottom: 12, backgroundColor: '#1F2937', gap: 12 },
   exitBtn: { width: 36, height: 36, borderRadius: 18, backgroundColor: '#374151', alignItems: 'center', justifyContent: 'center' },
   exitText: { color: '#F9FAFB', fontSize: 16, fontWeight: '700' },

@@ -1,12 +1,20 @@
-import { MMKV } from 'react-native-mmkv';
+import { createMMKV } from 'react-native-mmkv';
+import type { MMKV } from 'react-native-mmkv';
 
-export const sessionStorage = new MMKV({ id: 'session' });
-export const offlineQueueStorage = new MMKV({ id: 'offline-queue' });
-export const cacheStorage = new MMKV({ id: 'cache' });
-export const settingsStorage = new MMKV({ id: 'settings' });
+export const sessionStorage: MMKV = createMMKV({ id: 'session' });
+export const offlineQueueStorage: MMKV = createMMKV({ id: 'offline-queue' });
+export const cacheStorage: MMKV = createMMKV({ id: 'cache' });
+export const settingsStorage: MMKV = createMMKV({ id: 'settings' });
 
 export const zustandMMKVStorage = {
-  getItem: (key: string) => sessionStorage.getString(key) ?? null,
-  setItem: (key: string, value: string) => sessionStorage.set(key, value),
-  removeItem: (key: string) => sessionStorage.delete(key),
+  getItem: (key: string): string | null => {
+    const value = sessionStorage.getString(key);
+    return value !== undefined ? value : null;
+  },
+  setItem: (key: string, value: string): void => {
+    sessionStorage.set(key, value);
+  },
+  removeItem: (key: string): void => {
+    sessionStorage.remove(key);
+  },
 };
