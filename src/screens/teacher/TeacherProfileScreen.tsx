@@ -30,6 +30,7 @@ const TeacherProfileScreen = () => {
         { label: 'Batches', route: ROUTES.TEACHER_BATCHES },
         { label: 'Analytics', route: ROUTES.TEACHER_ANALYTICS },
         { label: 'Payments', route: ROUTES.TEACHER_PAYMENTS },
+        { label: '📱 UPI Payment Setup', route: ROUTES.UPI_SETUP },
         { label: 'Calendar', route: ROUTES.TEACHER_CALENDAR },
       ].map(item => (
         <TouchableOpacity key={item.label} style={s.menuItem} onPress={() => navigation.navigate(item.route)}>

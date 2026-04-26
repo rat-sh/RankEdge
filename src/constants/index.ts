@@ -80,5 +80,8 @@ export const ROUTES = {
   STUDENT_TODO: 'StudentTodo',
   FEE_PAYMENT: 'FeePayment',
   PAYMENT_HISTORY: 'PaymentHistory',
+  PAYMENT_SLIP: 'PaymentSlip',
   STUDENT_PROFILE: 'StudentProfile',
+  UPI_SETUP: 'UpiSetup',
+  TEACHER_PAYMENT_NOTIF: 'TeacherPaymentNotif',
 } as const;

@@ -48,6 +48,8 @@ import StudentFeeDetailScreen from '@/screens/teacher/StudentFeeDetailScreen';
 import TeacherCalendarScreen from '@/screens/teacher/TeacherCalendarScreen';
 import TeacherTodoScreen from '@/screens/teacher/TeacherTodoScreen';
 import TeacherProfileScreen from '@/screens/teacher/TeacherProfileScreen';
+import UpiSetupScreen from '@/screens/teacher/UpiSetupScreen';
+import TeacherPaymentNotifScreen from '@/screens/teacher/TeacherPaymentNotifScreen';
 
 import StudentHomeScreen from '@/screens/student/StudentHomeScreen';
 import MyTeachersScreen from '@/screens/student/MyTeachersScreen';
@@ -76,6 +78,7 @@ import StudentCalendarScreen from '@/screens/student/StudentCalendarScreen';
 import StudentTodoScreen from '@/screens/student/StudentTodoScreen';
 import FeePaymentScreen from '@/screens/student/FeePaymentScreen';
 import PaymentHistoryScreen from '@/screens/student/PaymentHistoryScreen';
+import PaymentSlipScreen from '@/screens/PaymentSlipScreen';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -158,6 +161,9 @@ export const AppNavigator = () => {
           <Stack.Screen name={ROUTES.STUDENT_ANALYTICS_DETAIL} component={StudentAnalyticsDetailScreen} />
           <Stack.Screen name={ROUTES.TEACHER_PAYMENTS} component={TeacherPaymentsScreen} />
           <Stack.Screen name={ROUTES.STUDENT_FEE_DETAIL} component={StudentFeeDetailScreen} />
+          <Stack.Screen name={ROUTES.UPI_SETUP} component={UpiSetupScreen} />
+          <Stack.Screen name={ROUTES.TEACHER_PAYMENT_NOTIF} component={TeacherPaymentNotifScreen} />
+          <Stack.Screen name={ROUTES.PAYMENT_SLIP} component={PaymentSlipScreen} />
           <Stack.Screen name={ROUTES.TEACHER_CALENDAR} component={TeacherCalendarScreen} />
           <Stack.Screen name={ROUTES.TEACHER_TODO} component={TeacherTodoScreen} />
           <Stack.Screen name={ROUTES.TEACHER_PROFILE} component={TeacherProfileScreen} />
@@ -187,6 +193,7 @@ export const AppNavigator = () => {
           <Stack.Screen name={ROUTES.STUDENT_TODO} component={StudentTodoScreen} />
           <Stack.Screen name={ROUTES.FEE_PAYMENT} component={FeePaymentScreen} />
           <Stack.Screen name={ROUTES.PAYMENT_HISTORY} component={PaymentHistoryScreen} />
+          <Stack.Screen name={ROUTES.PAYMENT_SLIP} component={PaymentSlipScreen} />
         </>
       )}
     </Stack.Navigator>

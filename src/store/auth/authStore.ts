@@ -12,6 +12,9 @@ export interface AuthUser {
   role: UserRole;
   avatarUrl?: string;
   batchIds: string[];
+  // UPI payment fields (optional – populated after teacher sets up QR)
+  upi_id?: string;
+  upi_qr_url?: string;
 }
 
 interface AuthState {
